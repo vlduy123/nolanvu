@@ -1,19 +1,27 @@
-import {
-	AdditiveBlending,
-	Color,
-	HalfFloatType,
-	MeshBasicMaterial,
-	ShaderMaterial,
-	UniformsUtils,
-	Vector2,
-	Vector3,
-	WebGLRenderTarget,
-	LinearFilter, // Added
-	RGBAFormat // Added
-} from 'https://unpkg.com/three-stdlib@latest/build/three-stdlib.module.js';
-import { Pass, FullScreenQuad } from './Pass.js';
-import { CopyShader } from '../shaders/CopyShader.js';
-import { LuminosityHighPassShader } from '../shaders/LuminosityHighPassShader.js';
+// Three.js core
+import * as THREE from 'https://unpkg.com/three@0.175.0/build/three.module.js';
+
+// Optional: Destructuring for convenience
+const {
+  AdditiveBlending,
+  Color,
+  LinearFilter,
+  MeshBasicMaterial,
+  RGBAFormat,
+  ShaderMaterial,
+  Texture,
+  UniformsUtils,
+  Vector2,
+  Vector3,
+  WebGLRenderer,
+  WebGLRenderTarget
+} = THREE;
+
+// Postprocessing and shaders from examples/jsm
+import { Pass, FullScreenQuad } from 'https://unpkg.com/three@0.175.0/examples/jsm/postprocessing/Pass.js';
+import { CopyShader } from 'https://unpkg.com/three@0.175.0/examples/jsm/shaders/CopyShader.js';
+import { LuminosityHighPassShader } from 'https://unpkg.com/three@0.175.0/examples/jsm/shaders/LuminosityHighPassShader.js';
+
 
 /**
  * This pass is inspired by the bloom pass of Unreal Engine. It creates a
