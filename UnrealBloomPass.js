@@ -10,7 +10,7 @@ import {
 	WebGLRenderTarget,
 	LinearFilter, // Added
 	RGBAFormat // Added
-} from 'three';
+} from 'https://unpkg.com/three-stdlib@latest/build/three-stdlib.module.js';
 import { Pass, FullScreenQuad } from './Pass.js';
 import { CopyShader } from '../shaders/CopyShader.js';
 import { LuminosityHighPassShader } from '../shaders/LuminosityHighPassShader.js';
