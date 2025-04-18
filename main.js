@@ -7,7 +7,7 @@ import { UnrealBloomPass } from "https://esm.sh/three/addons/postprocessing/Unre
 const canvas = document.getElementById("three-globe");
 const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 renderer.setClearColor(0x000000, 0);
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(window.devicePixelRatio); // Consider moving this to the resize function
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
 const radius = 20.0;
@@ -106,11 +106,9 @@ controls.addEventListener('start', () => {
 
 controls.addEventListener('end', () => {
     isDragging = false;
-    // You might want to add a delay here before re-enabling auto-spin
-    // to prevent it from starting immediately when the user releases the mouse.
     setTimeout(() => {
-        autoSpinSpeed = 0.0005; // Restart auto-spin after a delay
-    }, 200); // Short delay, adjust as needed
+        autoSpinSpeed = 0.0005;
+    }, 200);
 });
 
 let globe;
@@ -122,8 +120,7 @@ let glowingPins = new Set();
 let tooltipTimeout; // Declare tooltipTimeout outside of animate
 
 function animate() {
-
-    if (globe && !isDragging) { // Only rotate if not dragging
+    if (globe && !isDragging) {
         globe.rotation.y += autoSpinSpeed;
     }
     controls.update();
@@ -131,7 +128,6 @@ function animate() {
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(countryMeshes, false);
     const tooltip = document.getElementById('tooltip');
-
 
     if (intersects.length > 0 && lastMouseEvent) {
         const intersect = intersects[0];
@@ -141,22 +137,22 @@ function animate() {
             const countryName = intersectedObject.userData.countryName;
             const officeInfo = {
                 "Vietnam": `<b>Vietnam - Hanoi (Head Office)</b><br>
-                            Address: 8F, MITEC Building, Duong Dinh Nghe Street, Yen Hoa, Cau Giay, Hanoi<br>
-                            Phone: (+84)24 3795 5813<br><br>
-                            <b>Vietnam - Ho Chi Minh City Office</b><br>
-                            Address: 7th Floor, Jea Building, 112 Ly Chinh Thang, Vo Thi Sau Ward, District 3, Ho Chi Minh City<br>
-                            Phone: (+84)24 3795 5813`,
+                                            Address: 8F, MITEC Building, Duong Dinh Nghe Street, Yen Hoa, Cau Giay, Hanoi<br>
+                                            Phone: (+84)24 3795 5813<br><br>
+                                            <b>Vietnam - Ho Chi Minh City Office</b><br>
+                                            Address: 7th Floor, Jea Building, 112 Ly Chinh Thang, Vo Thi Sau Ward, District 3, Ho Chi Minh City<br>
+                                            Phone: (+84)24 3795 5813`,
                 "Australia": `<b>Australia Office</b><br>
-                            Address: 6 Kingsborough Way, Zetland, 2017 Sydney<br>
-                            Phone: (+61) 413396603`,
+                                            Address: 6 Kingsborough Way, Zetland, 2017 Sydney<br>
+                                            Phone: (+61) 413396603`,
                 "Japan": `<b>Japan Office</b><br>
-                            Address: 1-1-7 Shibuya, Shibuya-ku, Tokyo, 150-0002 Japan<br>
-                            Phone: (+81) 03-6433-5840`,
+                                            Address: 1-1-7 Shibuya, Shibuya-ku, Tokyo, 150-0002 Japan<br>
+                                            Phone: (+81) 03-6433-5840`,
                 "United States of America": `<b>United States Office</b><br>
-                            Address: 7505 Tuscany Ln San Diego California 92126`,
+                                            Address: 7505 Tuscany Ln San Diego California 92126`,
                 "Germany": `<b>Germany Office</b><br>
-                            Address: Prignitzstr. 6 15366 Hoppegarten, Deutschland<br>
-                            Phone: (+49)1515 9158888`
+                                            Address: Prignitzstr. 6 15366 Hoppegarten, Deutschland<br>
+                                            Phone: (+49)1515 9158888`
             };
 
             let tooltipText = `Country: ${countryName}`;
@@ -222,11 +218,10 @@ function animate() {
 
     updateParticles();
     animateCallbacks.forEach(callback => callback());
-    composer.render();
+    composer.render(); // Use composer.render()
 
     requestAnimationFrame(animate);
 }
-
 
 globe = new THREE.Mesh(
     new THREE.SphereGeometry(radius, 64, 64),
@@ -271,12 +266,15 @@ fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.g
         return res.json();
     })
     .then(geojson => {
-        geojson.features.forEach(feature => {
+        const countryFeatures = geojson.features; // Store features in a variable
+
+        for (let i = 0; i < countryFeatures.length; i++) { // Use a standard for loop
+            const feature = countryFeatures[i];
             const { type, coordinates } = feature.geometry;
             const name = feature.properties.name;
 
             const isHighlighted = highlightedCountries.hasOwnProperty(name);
-            const lineColor = isHighlighted ? highlightedCountries[name].color : techPalette.accent;  // Default color
+            const lineColor = isHighlighted ? highlightedCountries[name].color : techPalette.accent;
             const opacity = isHighlighted ? 0.9 : 0.2;
 
             const addOutline = (polyCoords) => {
@@ -300,7 +298,7 @@ fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.g
             } else if (type === 'MultiPolygon') {
                 coordinates.forEach(polygon => polygon.forEach(addOutline));
             }
-        });
+        }
     })
     .catch(error => {
         console.error('Error fetching or processing country data:', error);
@@ -332,7 +330,7 @@ function createCountryPins() {
         opacity: 0.9,
     });
 
-    Object.entries(countryCoordinates).forEach(([name, [lat, lon]]) => {
+    for (const [name, [lat, lon]] of Object.entries(countryCoordinates)) { // Use for...of
         const position = latLonToVector3(lat, lon, radius);
         const normal = position.clone().normalize();
 
@@ -375,7 +373,7 @@ function createCountryPins() {
         globe.add(labelSprite);
 
         countryLabels[name] = labelSprite;
-    });
+    }
 }
 
 // ---- Particle System ----
@@ -406,19 +404,28 @@ const createCurve = (from, to) => {
     return new THREE.QuadraticBezierCurve3(from, mid, to);
 };
 
-const getAvailableTrailLine = () => trailLines.find(line => !line.visible);
+const getAvailableTrailLine = () => {
+    for (let i = 0; i < trailLines.length; i++) { // Use standard for loop
+        const line = trailLines[i];
+        if (!line.visible) {
+            return line;
+        }
+    }
+    return undefined;
+};
 
 // ---Trail Lines---
-const trailLines = Array.from({ length: MAX_PARTICLES }, () => {
+const trailLines = []; // Don't pre-allocate with a fixed size.
+
+for (let i = 0; i < MAX_PARTICLES; i++) {
     const line = new THREE.Line(
         new THREE.BufferGeometry(),
         new THREE.LineBasicMaterial({ color: PARTICLE_COLOR, transparent: true, opacity: 0.6 })
     );
     line.visible = false;
     globe.add(line);
-    return line;
-});
-
+    trailLines.push(line);
+}
 /**
  * Creates a particle and its associated trail.
  * @param from - The starting point of the particle.
@@ -478,7 +485,6 @@ function updateParticles() {
             } else {
                 p.trailLine.visible = false;
                 activeParticles.splice(i, 1);
-                i--;
             }
             continue;
         }
@@ -588,13 +594,13 @@ document.addEventListener('keydown', (e) => {
 // Function to add the background sphere
 function addBackgroundSphere() {
     const backgroundSphere = new THREE.Mesh(
-        new THREE.SphereGeometry(radius * 10, 64, 64), // Make it very large
+        new THREE.SphereGeometry(radius * 10, 64, 64),
         new THREE.MeshBasicMaterial({
-            color: techPalette.backgroundcolor, // Or another dark color from your techPalette
-            side: THREE.BackSide // Render the inside of the sphere
+            color: techPalette.backgroundcolor,
+            side: THREE.BackSide
         })
     );
     scene.add(backgroundSphere);
     backgroundSphere.position.set(0, 0, 0);
-    backgroundSphere.frustumCulled = false; // Prevent it from being culled if the camera is inside
+    backgroundSphere.frustumCulled = false;
 }
