@@ -186,7 +186,7 @@ function setRendererSize() {
  * @param {MouseEvent} mouseEvent Mouse event object.
  */
 function showTooltip(countryName, mouseEvent) {
-    const tooltip = document.getElementById('tooltip');
+    const tooltip = document.getElementByClassName('tooltip');
     let tooltipText = ``;
 
     if (officeInfo[countryName]) {
