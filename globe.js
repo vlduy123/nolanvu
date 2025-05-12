@@ -204,7 +204,7 @@ function setRendererSize() {
  * @param {MouseEvent} mouseEvent Mouse event object.
  */
 function showTooltip(countryName, mouseEvent) {
-    const tooltip = document.getElementById('tooltip');
+    const tooltip = document.querySelector('.tooltip');
     let tooltipText = ``;
 
     if (officeInfo[countryName]) {
@@ -241,7 +241,7 @@ function showTooltip(countryName, mouseEvent) {
  * Hides the tooltip.
  */
 function hideTooltip() {
-    const tooltip = document.getElementById('tooltip');
+    const tooltip = document.querySelector('.tooltip');
     if (tooltipTimeout) {
         clearTimeout(tooltipTimeout);
         tooltipTimeout = null;
@@ -574,7 +574,7 @@ const GlobeFragmentShader = `
 
 // --- 5. Initial Setup ---
 async function initialize() {
-    canvas = document.getElementById("three-globe");
+    canvas = document.querySelector(".three-globe");
     renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(window.devicePixelRatio);
