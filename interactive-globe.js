@@ -593,7 +593,7 @@ async function initialize() {
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.1;
-    controls.enableZoom = true;
+    controls.enableZoom = false;
     controls.enableRotate = true;
     controls.enablePan = false;
 
