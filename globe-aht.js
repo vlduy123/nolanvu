@@ -114,7 +114,7 @@ const countryCoordinates = {
 const highlightedCountries = {
     "Vietnam": { coords: [14.0583, 108.2772], color: TECH_PALETTE.highlight },
     "Japan": { coords: [36.2048, 138.2529], color: TECH_PALETTE.highlight },
-    "Australia": { coords: [-25.2744, 133.7751], color: TECH_PALETTE.highlight },
+    "Australia": { coords: [-25.2744, 133.7751],  color: TECH_PALETTE.highlight },
     "United States of America": { coords: [37.0902, -95.7129], color: TECH_PALETTE.highlight },
     "Germany": { coords: [51.1657, 10.4515], color: TECH_PALETTE.highlight },
     "Thailand": { coords: [15.87, 100.9925], color: TECH_PALETTE.highlight },
@@ -230,9 +230,9 @@ function highlightCountry(countryName) {
             }
         });
     }
-    if (labelSprites[countryName]) {
-        selectiveBloom.selection.add(labelSprites[countryName]);
-    }
+     if (labelSprites[countryName]) {
+         selectiveBloom.selection.add(labelSprites[countryName]);
+     }
 }
 
 function unhighlightCountry(countryName) {
@@ -256,9 +256,9 @@ function unhighlightCountry(countryName) {
             }
         });
     }
-    if (labelSprites[countryName]) {
-        selectiveBloom.selection.delete(labelSprites[countryName]);
-    }
+     if (labelSprites[countryName]) {
+         selectiveBloom.selection.delete(labelSprites[countryName]);
+     }
 }
 
 // --- 4. Shaders ---
@@ -274,6 +274,7 @@ const GlobeVertexShader = `
     const float uRoughness2 = 0.9;
     uniform float uNoiseQuality;
     uniform mat3 envMapRotation;
+
 
     vec3 inverseTransformDirection(in vec3 dir, in mat4 matrix) {
         return normalize((vec4(dir, 0.0) * matrix).xyz);
@@ -301,6 +302,7 @@ const GlobeVertexShader = `
 
         vReflectLand = calculateReflection(viewDir, viewNormal, uRoughness2);
         vReflectWater = calculateReflection(viewDir, viewNormal, uRoughness);
+
 
         float lower = mix(0.5, 0.1, uNoiseQuality);
         float higher = mix(0.7, 1.0, uNoiseQuality);
@@ -349,6 +351,7 @@ const GlobeFragmentShader = `
     uniform float uTime;
     uniform sampler2D envMap;
     uniform float uLandEnvMultiplier;
+
 
     float psrdnoise(vec2 x, float alpha, out vec2 gradient) {
         vec2 uv = vec2(x.x + x.y * 0.5, x.y);
@@ -446,13 +449,6 @@ const GlobeFragmentShader = `
             finalColor = texture(uLandColors, vec2(lerpFactor, 0.5)).rgb;
         }
 
-        // Apply shadow to bottom-right quadrant (UV: high u, high v)
-        vec2 shadowCenter = vec2(0.75, 0.75); // Center of shadow in UV space
-        float shadowRadius = 0.5; // Radius of shadow effect
-        float shadowDistance = length(vUv - shadowCenter);
-        float shadowFactor = smoothstep(shadowRadius - 0.2, shadowRadius, shadowDistance);
-        finalColor *= (1.0 - shadowFactor * 0.8); // Darken by up to 80%
-
         finalColor *= bloomIntensity;
         gl_FragColor = vec4(finalColor, 1.0);
     }
@@ -519,6 +515,9 @@ async function initialize() {
       const inside = x >= left && x <= left + width && y >= top && y <= top + height;
       canvasElement.style.cursor = inside ? 'grab' : 'default';
     });
+    
+
+    // ***** END: Cursor Change Integration *****
 
     window.addEventListener("resize", setRendererSize);
     window.addEventListener("load", async () => {
@@ -611,6 +610,7 @@ async function createGlobe() {
     );
     globe.userData = { isGlobe: true };
     scene.add(globe);
+    
 }
 
 // --- 7. Lighting ---
@@ -787,6 +787,7 @@ class ShootingStar {
         const heightOffset = 1.5 + distance * 0.4;
         const controlPoint = midSphereNormal.multiplyScalar(RADIUS + 1 + heightOffset);
 
+
         this.path = new THREE.QuadraticBezierCurve3(
             this.startPos,
             controlPoint,
@@ -809,9 +810,9 @@ class ShootingStar {
         const trailMat = new THREE.ShaderMaterial({
             uniforms: {
                 uTime: { value: 0.0 },
-                bloomIntensity: { value: 0.5 },
-                bloomFalloff: { value: 18.0 },
-                noiseScale: { value: new THREE.Vector2(10.0, 100.0) },
+                bloomIntensity: { value: 0.8 },
+                bloomFalloff: { value: 15.0 },
+                noiseScale: { value: new THREE.Vector2(10.0, 150.0) },
                 color: { value: new THREE.Color(TECH_PALETTE.white) },
             },
             vertexShader: `
@@ -825,7 +826,7 @@ class ShootingStar {
                     vAlpha = alpha;
 
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                    gl_PointSize = 2.0;
+                    gl_PointSize = 3.0;
                 }
             `,
             fragmentShader: `
@@ -952,6 +953,7 @@ class ShootingStar {
     }
 }
 
+
 class ShootingStarManager {
     constructor(scene, globe) {
         this.scene = scene;
@@ -982,9 +984,9 @@ class ShootingStarManager {
             while (b === a) b = Math.floor(Math.random() * names.length);
 
             const star = new ShootingStar(names[a], names[b], this.scene, this.globe);
-            if (!star.isFinished) {
-                this.stars.push(star);
-            }
+             if (!star.isFinished) {
+                 this.stars.push(star);
+             }
         }
     }
 }
@@ -1055,10 +1057,12 @@ function handleInteractions() {
         targetGlobeScale = 1.0;
     }
 
-    if (!isHovered && !isDragging && autoSpinSpeed === 0) {
-        autoSpinSpeed = 0.0005;
-    }
+     if (!isHovered && !isDragging && autoSpinSpeed === 0) {
+         autoSpinSpeed = 0.0005;
+     }
 }
+
+
 
 // --- 12. Animation Loop ---
 function animate() {
@@ -1098,3 +1102,5 @@ function animate() {
 
 // --- 13. Initialization Call ---
 initialize();
+
+//This code is made by Nolan Vu - email: duyvl@arrowhitech.com
