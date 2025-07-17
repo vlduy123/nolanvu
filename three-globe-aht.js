@@ -795,11 +795,10 @@ class ShootingStar {
         );
 
         this.length = this.path.getLength();
-        this.speed = 18;
+        this.speed = 20;
         this.progress = 0;
 
-        this.trailLength = 150;
-        this.trailGeo = new THREE.BufferGeometry();
+        this.trailLength = Math.min(250, Math.floor(50 + distance * 10));        this.trailGeo = new THREE.BufferGeometry();
         this.trailPts = new Float32Array(this.trailLength * 3);
         this.trailCols = new Float32Array(this.trailLength * 3);
         this.trailAlps = new Float32Array(this.trailLength);
@@ -810,9 +809,9 @@ class ShootingStar {
         const trailMat = new THREE.ShaderMaterial({
             uniforms: {
                 uTime: { value: 0.0 },
-                bloomIntensity: { value: 0.8 },
-                bloomFalloff: { value: 15.0 },
-                noiseScale: { value: new THREE.Vector2(10.0, 150.0) },
+                bloomIntensity: { value: 1.5 },
+                bloomFalloff: { value: 8.0 },
+                noiseScale: { value: new THREE.Vector2(30.0, 30.0) },
                 color: { value: new THREE.Color(TECH_PALETTE.white) },
             },
             vertexShader: `
@@ -826,7 +825,9 @@ class ShootingStar {
                     vAlpha = alpha;
 
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                    gl_PointSize = 3.0;
+                    // Modified gl_PointSize to make the tail taper.
+                    // It now scales with vAlpha, which decreases towards the end of the trail.
+                    gl_PointSize = 0.8 * vAlpha;
                 }
             `,
             fragmentShader: `
@@ -928,19 +929,19 @@ class ShootingStar {
         if (this.hasArrived && this.points.length > 0) {
             const oldestPointAge = this.points[0].age;
             if (oldestPointAge > 1.0) {
-                 this.points.shift();
-                 if (this.points.length === 0) {
-                     this.group.remove(this.trailMesh);
-                     this.trailGeo.dispose();
-                     this.trailMesh.material.dispose();
-                     this.isFinished = true;
-                 }
+                this.points.shift();
+                if (this.points.length === 0) {
+                    this.group.remove(this.trailMesh);
+                    this.trailGeo.dispose();
+                    this.trailMesh.material.dispose();
+                    this.isFinished = true;
+                }
             }
         } else if (this.hasArrived && this.points.length === 0) {
-             this.group.remove(this.trailMesh);
-             this.trailGeo.dispose();
-             this.trailMesh.material.dispose();
-             this.isFinished = true;
+            this.group.remove(this.trailMesh);
+            this.trailGeo.dispose();
+            this.trailMesh.material.dispose();
+            this.isFinished = true;
         }
     }
 
@@ -984,9 +985,9 @@ class ShootingStarManager {
             while (b === a) b = Math.floor(Math.random() * names.length);
 
             const star = new ShootingStar(names[a], names[b], this.scene, this.globe);
-             if (!star.isFinished) {
-                 this.stars.push(star);
-             }
+            if (!star.isFinished) {
+                this.stars.push(star);
+            }
         }
     }
 }
